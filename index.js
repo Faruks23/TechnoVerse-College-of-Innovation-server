@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
@@ -46,11 +46,23 @@ async function run() {
     // get all colleges data from the server
     const collagesCollection = client.db("All_collage").collection("colleges");
         
+
+
+    // get all data from the server
     app.get('/colleges', async (req, res) => { 
       const result = await collagesCollection.find().toArray();
       res.send(result);
     })
+//  get colleges details by id
+    app.get('/Details/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id) }
+      const results = await collagesCollection.findOne(query)
+      res.send(results)
 
+      console.log(id);
+    }
+    )
 
 
 
