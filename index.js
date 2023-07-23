@@ -45,7 +45,8 @@ async function run() {
 
     // get all colleges data from the server
     const collagesCollection = client.db("All_collage").collection("colleges");
-        
+    const ReviewCollections = client.db("All_collage").collection("Review");
+    const AddmissionForm = client.db("All_collage").collection("Form");
 
 
     // get all data from the server
@@ -54,15 +55,36 @@ async function run() {
       res.send(result);
     })
 //  get colleges details by id
+    
     app.get('/Details/:id', async (req, res) => {
       const id = req.params.id;
       const query = {_id: new ObjectId(id) }
       const results = await collagesCollection.findOne(query)
       res.send(results)
 
-      console.log(id);
+    
     }
     )
+
+    // get review 
+    app.get('/reviews' ,async (req, res) => { 
+      const results = await ReviewCollections.find().toArray();
+      res.send(results)
+    })
+
+    // post Addmissions form
+    app.post('/admissionsForm', async (req, res) => {
+      const data = req.body;
+      const results = await AddmissionForm.insertOne(data);
+       res.send(results);
+
+    })
+    app.get('/form/:email', async (req, res) => { 
+      const email = req.params.email;
+      const query = { email: email }
+      const result = await AddmissionForm.findOne(query);
+      res.send(result)
+    })
 
 
 
