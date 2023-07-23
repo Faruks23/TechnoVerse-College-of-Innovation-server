@@ -79,12 +79,68 @@ async function run() {
        res.send(results);
 
     })
-    app.get('/form/:email', async (req, res) => { 
-      const email = req.params.email;
-      const query = { email: email }
-      const result = await AddmissionForm.findOne(query);
-      res.send(result)
-    })
+    // app.get("/MyCollege/:email", async (req, res) => {
+    //   const email = req.params.email;
+    //   const query = { email: email };
+    //     const user = await AddmissionForm.find(query).toArray( );
+     
+    //   const colleges = await collagesCollection.find().toArray();
+      
+   
+      
+   
+     
+    // });
+
+   app.get("/MyCollege/:email", async (req, res) => {
+     try {
+       const email = req.params.email;
+       console.log("Requested email:", email);
+
+       const query = { email: email };
+       const user = await AddmissionForm.find(query).toArray();
+
+       if (!user) {
+         console.log("User not found for email:", email);
+         return res.status(404).json({ message: "User not found" });
+       }
+
+       console.log("Found user:", user);
+
+       const colleges = await collagesCollection
+         .find({ "user._id": new ObjectId(user._id) })
+         .toArray();
+       console.log("Matching colleges:", colleges);
+
+       return res.json(colleges);
+     } catch (error) {
+       console.error("Error fetching data:", error);
+       res.status(500).json({ message: "Internal server error" });
+     }
+   });
+
+
+    // search  colleges  by name
+app.get("/api/colleges/search", async (req, res) => {
+  try {
+    const searchQuery = req.query.q; // Get the search query from the query parameters
+    console.log(searchQuery);
+    if (!searchQuery) {
+      return res.status(400).json({ message: "Search query not provided" });
+    }
+
+  
+    // Perform the search query using the find method and regular expression to make the search case-insensitive
+    const colleges = await collagesCollection
+      .find({collegeName: { $regex: new RegExp(searchQuery, "i") } })
+      .toArray();
+
+    res.json(colleges);
+  } catch (error) {
+    console.error("Error searching colleges:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 
 
