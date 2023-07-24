@@ -48,6 +48,7 @@ async function run() {
     const ReviewCollections = client.db("All_collage").collection("Review");
     const AddmissionForm = client.db("All_collage").collection("Form");
     const UserCollection = client.db("All_collage").collection("Users");
+   
 
 
     // get all data from the server
@@ -96,24 +97,10 @@ async function run() {
    app.get("/MyCollege/:email", async (req, res) => {
      try {
        const email = req.params.email;
-       console.log("Requested email:", email);
+       const query = { CandidateEmail: email };
+       const user = await AddmissionForm.find(query).toArray();  
+       return res.send(user);
 
-       const query = { email: email };
-       const user = await AddmissionForm.find(query).toArray();
-
-       if (!user) {
-         console.log("User not found for email:", email);
-         return res.status(404).json({ message: "User not found" });
-       }
-
-       console.log("Found user:", user);
-
-       const colleges = await collagesCollection
-         .find({ "user._id": new ObjectId(user._id) })
-         .toArray();
-       console.log("Matching colleges:", colleges);
-
-       return res.json(colleges);
      } catch (error) {
        console.error("Error fetching data:", error);
        res.status(500).json({ message: "Internal server error" });
@@ -121,6 +108,10 @@ async function run() {
    });
 
 
+    
+    
+    
+    
     // search  colleges  by name
 app.get("/api/colleges/search", async (req, res) => {
   try {
@@ -171,10 +162,11 @@ app.get("/api/colleges/search", async (req, res) => {
       console.log(user);
       const query = { email: emails};
        
+
       const updateDoc = {
         $set: {
           name: user.name,
-          email: user.email,
+          emailes: user.email,
           university: user.university,
           address:user.address
 
@@ -187,8 +179,10 @@ app.get("/api/colleges/search", async (req, res) => {
     });
 
 
-    app.get("/users/:email", async (req, res) => { 
-      const query={ email: req.body.email}
+
+    // get users from 
+    app.get("/getUser/:email", async (req, res) => { 
+      const query={ email: req.params.email}
       const result = await UserCollection.findOne(query);
       res.send(result);
 
@@ -196,7 +190,16 @@ app.get("/api/colleges/search", async (req, res) => {
 
     });
 
+ 
 
+    // add review to db
+    app.post("/AddReview", async (req, res) => { 
+      const review = req.body
+       const result = await ReviewCollections.insertOne(review);
+        res.send(result)
+    });
+
+  
 
 
 
