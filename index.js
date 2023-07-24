@@ -47,6 +47,7 @@ async function run() {
     const collagesCollection = client.db("All_collage").collection("colleges");
     const ReviewCollections = client.db("All_collage").collection("Review");
     const AddmissionForm = client.db("All_collage").collection("Form");
+    const UserCollection = client.db("All_collage").collection("Users");
 
 
     // get all data from the server
@@ -142,6 +143,58 @@ app.get("/api/colleges/search", async (req, res) => {
   }
 });
 
+
+    // post user to database
+
+    app.post("/users", async (req, res) => { 
+      const user = req.body
+           const query = { email: user.email }
+      const existingUser = await UserCollection.findOne(query);
+      if (existingUser) {
+          return res.send({ message:"user already exists" });
+      } else {
+        const result = await UserCollection.insertOne(user);
+        res.send(result);
+      }
+      
+
+      
+
+    });
+
+    // UpdateUsers;
+
+    app.put("/UpdateUsers/:email", async (req, res) => {
+      const emails = req.params.email;
+      console.log(emails);
+      const user = req.body
+      console.log(user);
+      const query = { email: emails};
+       
+      const updateDoc = {
+        $set: {
+          name: user.name,
+          email: user.email,
+          university: user.university,
+          address:user.address
+
+          
+        },
+      };
+
+      const result = await UserCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
+
+    app.get("/users/:email", async (req, res) => { 
+      const query={ email: req.body.email}
+      const result = await UserCollection.findOne(query);
+      res.send(result);
+
+      
+
+    });
 
 
 
